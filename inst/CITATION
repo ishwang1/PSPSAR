@@ -1,0 +1,25 @@
+bibentry(
+  bibtype = "Misc",
+  title = "Profiled Semiparametric GMM for a State-Varying SAR Coefficient",
+  author = c(
+    person("Haiqiang", "Chen"),
+    person("Yingxing", "Li"),
+    person("Xiaojun", "Song"),
+    person("Yishu", "Wang")
+  ),
+  year = "2026",
+  note = "Working paper"
+)
+
+bibentry(
+  bibtype = "Misc",
+  title = "Air Quality and Spatial Spillovers in Electric Vehicle Charging: A State-Varying Spatial Autoregressive Model",
+  author = c(
+    person("Zhiqiang", "Lan"),
+    person("Xiangfu", "Luo"),
+    person("Yishu", "Wang"),
+    person("Guoyao", "Wu")
+  ),
+  year = "2026",
+  note = "Working paper"
+)
