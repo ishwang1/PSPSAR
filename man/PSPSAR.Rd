@@ -25,7 +25,7 @@ PSPSAR(Y, X, W, z, grid = sort(unique(z)), iv_lag = 1,
   \item{hac_method}{\code{"Newey-West"} for Newey-West HAC or \code{"Andrews"} for Andrews HAC.}
   \item{preprocess_W}{If \code{FALSE}, apply built-in diagonal removal, isolated unit removal, and row normalization when needed. If \code{TRUE}, use \code{W} as supplied.}
 }
-\value{A list with \code{beta}, \code{rho}, \code{residuals}, \code{hac_bandwidths}, and \code{diagnostics}. \code{beta} and \code{rho} contain estimates, standard errors, and confidence intervals; \code{rho} is evaluated at \code{grid}.}
+\value{A list with \code{beta}, \code{rho}, \code{residuals}, \code{hac_bandwidths}, and \code{diagnostics}. \code{beta} and \code{rho} contain raw estimates, debiased estimates in \code{debiased}, standard errors, confidence intervals, and p-values in \code{p}; \code{rho} is evaluated at \code{grid}.}
 \details{The model has a state-varying spatial coefficient and global covariate coefficients. It accepts time-invariant or time-varying covariates and uses spatial lags of covariates as instruments.}
 \references{Chen, Haiqiang, Yingxing Li, Xiaojun Song, and Yishu Wang (2026). \emph{Profiled Semiparametric GMM for a State-Varying SAR Coefficient}. Working paper.\cr\cr Lan, Zhiqiang, Xiangfu Luo, Yishu Wang, and Guoyao Wu (2026). \emph{Air Quality and Spatial Spillovers in Electric Vehicle Charging: A State-Varying Spatial Autoregressive Model}. Working paper.}
 \description{Fits a profiled state-varying spatial autoregressive model with 2SLS or feasible GMM estimation and HAC inference.}

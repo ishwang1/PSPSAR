@@ -629,17 +629,30 @@ PSPSAR <- local({
     } else {
       beta_raw
     }
+    # Use the inference center so debiased p-values match the reported interval.
+    beta_statistic <- beta_center / beta_se
+    beta_p <- 2 * stats::pnorm(abs(beta_statistic), lower.tail = FALSE)
 
     # The public point estimate remains raw; debiased inference only shifts the CI center.
-    data.frame(
+    beta_output <- data.frame(
       term = beta_names,
       estimate = beta_raw,
+      debiased = beta_center,
       bias = beta_bias,
       se = beta_se,
       lower = beta_center - z_alpha * beta_se,
       upper = beta_center + z_alpha * beta_se,
+      p = beta_p,
       stringsAsFactors = FALSE
     )
+
+    # Keep covariates first and place the intercept last in the public table.
+    beta_output <- beta_output[c(
+      which(beta_output$term != "(Intercept)"),
+      which(beta_output$term == "(Intercept)")
+    ), , drop = FALSE]
+    rownames(beta_output) <- NULL
+    beta_output
   }
 
   finalize_rho_output <- function(grid, rho_raw, rho_bias, rho_se, ci_level, inference) {
@@ -649,14 +662,18 @@ PSPSAR <- local({
     } else {
       rho_raw
     }
+    rho_statistic <- rho_center / rho_se
+    rho_p <- 2 * stats::pnorm(abs(rho_statistic), lower.tail = FALSE)
 
     data.frame(
       z = grid,
       estimate = rho_raw,
+      debiased = rho_center,
       bias = rho_bias,
       se = rho_se,
       lower = rho_center - z_alpha * rho_se,
       upper = rho_center + z_alpha * rho_se,
+      p = rho_p,
       stringsAsFactors = FALSE
     )
   }

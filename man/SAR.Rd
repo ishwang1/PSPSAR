@@ -16,6 +16,6 @@ SAR(Y, X, W, iv_lag = 1, estimator = c("2SLS", "GMM"),
   \item{hac_method}{\code{"Newey-West"} for Newey-West HAC or \code{"Andrews"} for Andrews HAC.}
   \item{preprocess_W}{If \code{FALSE}, apply built-in spatial weight preprocessing when needed. If \code{TRUE}, use \code{W} as supplied.}
 }
-\value{A list with \code{beta}, \code{rho}, \code{residuals}, and \code{diagnostics}. Coefficient tables contain \code{term}, \code{estimate}, \code{se}, \code{lower}, and \code{upper}; diagnostics include estimation, first-stage, HAC, and spatial weight details.}
+\value{A list with \code{beta}, \code{rho}, \code{residuals}, and \code{diagnostics}. Coefficient tables contain \code{term}, \code{estimate}, \code{se}, \code{lower}, \code{upper}, and p-values in \code{p}; diagnostics include estimation, first-stage, HAC, and spatial weight details.}
 \details{The model has one constant spatial autoregressive coefficient. It instruments the endogenous spatial lag using covariates and their spatial lags, and estimates HAC standard errors over time.}
 \description{Fits a constant coefficient spatial autoregressive benchmark using two-stage least squares or feasible GMM.}

@@ -350,6 +350,24 @@ SAR <- local({
     se <- sqrt(pmax(diag(vcov_delta), 0))
     lower <- delta - z_alpha * se
     upper <- delta + z_alpha * se
+    statistic <- delta / se
+    p <- 2 * stats::pnorm(abs(statistic), lower.tail = FALSE)
+
+    beta_output <- data.frame(
+      term = beta_names,
+      estimate = delta[-1],
+      se = se[-1],
+      lower = lower[-1],
+      upper = upper[-1],
+      p = p[-1],
+      stringsAsFactors = FALSE
+    )
+    # Keep covariates first and place the intercept last in the public table.
+    beta_output <- beta_output[c(
+      which(beta_output$term != "(Intercept)"),
+      which(beta_output$term == "(Intercept)")
+    ), , drop = FALSE]
+    rownames(beta_output) <- NULL
 
     list(
       rho = data.frame(
@@ -358,16 +376,10 @@ SAR <- local({
         se = se[1],
         lower = lower[1],
         upper = upper[1],
+        p = p[1],
         stringsAsFactors = FALSE
       ),
-      beta = data.frame(
-        term = beta_names,
-        estimate = delta[-1],
-        se = se[-1],
-        lower = lower[-1],
-        upper = upper[-1],
-        stringsAsFactors = FALSE
-      )
+      beta = beta_output
     )
   }
 
