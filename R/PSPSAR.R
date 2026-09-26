@@ -177,27 +177,46 @@ PSPSAR <- local({
     for (t in seq_len(T_periods)) {
       X_cov_t <- as.matrix(get_X_cov_t(X, t))
       colnames(X_cov_t) <- covariate_names
-      X_aug_t <- augment_X(X_cov_t)
-      base_instr_t <- X_aug_t
+      X_cov_list[[t]] <- X_cov_t
+      X_aug_list[[t]] <- augment_X(X_cov_t)
+    }
 
-      if (iv_lag > 0L && ncol(X_cov_t) > 0L) {
-        WX <- X_cov_t
+    # A covariate common to every unit in each period satisfies Wx_t = x_t for
+    # row-normalized W, so its spatial lag is redundant as an IV. Retain such a
+    # covariate in X while generating spatial-lag instruments only for columns
+    # that exhibit cross-sectional variation in at least one period.
+    variation_tolerance <- sqrt(.Machine$double.eps)
+    spatial_iv_columns <- vapply(seq_along(covariate_names), function(j) {
+      any(vapply(X_cov_list, function(X_cov_t) {
+        values <- X_cov_t[, j]
+        value_scale <- max(1, max(abs(values)))
+        (max(values) - min(values)) > variation_tolerance * value_scale
+      }, logical(1)))
+    }, logical(1))
+
+    for (t in seq_len(T_periods)) {
+      X_cov_t <- X_cov_list[[t]]
+      base_instr_t <- X_aug_list[[t]]
+
+      if (iv_lag > 0L && any(spatial_iv_columns)) {
+        WX <- X_cov_t[, spatial_iv_columns, drop = FALSE]
+        spatial_iv_names <- covariate_names[spatial_iv_columns]
         for (lag in seq_len(iv_lag)) {
           WX <- W %*% WX
-          colnames(WX) <- paste0("W", lag, "_", covariate_names)
+          colnames(WX) <- paste0("W", lag, "_", spatial_iv_names)
           base_instr_t <- cbind(base_instr_t, WX)
         }
       }
 
-      X_cov_list[[t]] <- X_cov_t
-      X_aug_list[[t]] <- X_aug_t
       base_instr_list[[t]] <- base_instr_t
     }
 
     list(
       X_cov = X_cov_list,
       X_aug = X_aug_list,
-      base_instr = base_instr_list
+      base_instr = base_instr_list,
+      spatial_iv_covariates = covariate_names[spatial_iv_columns],
+      excluded_spatial_iv_covariates = covariate_names[!spatial_iv_columns]
     )
   }
 
@@ -1020,6 +1039,8 @@ PSPSAR <- local({
       bandwidth_source = bandwidth_source,
       hac_method = hac_method,
       iv_lag = as.integer(iv_lag),
+      spatial_iv_covariates = time_objects$spatial_iv_covariates,
+      excluded_spatial_iv_covariates = time_objects$excluded_spatial_iv_covariates,
       W_processed = W_processed,
       dropped_units = dropped_units,
       N_used = N_units

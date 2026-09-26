@@ -203,27 +203,44 @@ SAR <- local({
     for (t in seq_len(T_periods)) {
       X_cov_t <- as.matrix(get_X_cov_t(X, t))
       colnames(X_cov_t) <- covariate_names
-      X_aug_t <- augment_X(X_cov_t)
-      instr_t <- X_aug_t
+      X_cov[[t]] <- X_cov_t
+      X_aug[[t]] <- augment_X(X_cov_t)
+    }
 
-      if (iv_lag > 0L && ncol(X_cov_t) > 0L) {
-        WX <- X_cov_t
+    # Do not create redundant spatial-lag instruments for covariates that are
+    # common to all units within every period, such as time fixed effects.
+    variation_tolerance <- sqrt(.Machine$double.eps)
+    spatial_iv_columns <- vapply(seq_along(covariate_names), function(j) {
+      any(vapply(X_cov, function(X_cov_t) {
+        values <- X_cov_t[, j]
+        value_scale <- max(1, max(abs(values)))
+        (max(values) - min(values)) > variation_tolerance * value_scale
+      }, logical(1)))
+    }, logical(1))
+
+    for (t in seq_len(T_periods)) {
+      X_cov_t <- X_cov[[t]]
+      instr_t <- X_aug[[t]]
+
+      if (iv_lag > 0L && any(spatial_iv_columns)) {
+        WX <- X_cov_t[, spatial_iv_columns, drop = FALSE]
+        spatial_iv_names <- covariate_names[spatial_iv_columns]
         for (lag in seq_len(iv_lag)) {
           WX <- W %*% WX
-          colnames(WX) <- paste0("W", lag, "_", covariate_names)
+          colnames(WX) <- paste0("W", lag, "_", spatial_iv_names)
           instr_t <- cbind(instr_t, WX)
         }
       }
 
-      X_cov[[t]] <- X_cov_t
-      X_aug[[t]] <- X_aug_t
       instruments[[t]] <- instr_t
     }
 
     list(
       X_cov = X_cov,
       X_aug = X_aug,
-      instruments = instruments
+      instruments = instruments,
+      spatial_iv_covariates = covariate_names[spatial_iv_columns],
+      excluded_spatial_iv_covariates = covariate_names[!spatial_iv_columns]
     )
   }
 
@@ -480,6 +497,8 @@ SAR <- local({
     result$diagnostics <- list(
       estimator = estimator,
       iv_lag = as.integer(iv_lag),
+      spatial_iv_covariates = time_objects$spatial_iv_covariates,
+      excluded_spatial_iv_covariates = time_objects$excluded_spatial_iv_covariates,
       first_stage = first_stage,
       hac_method = hac_method,
       hac_bandwidth = hac_bandwidth,

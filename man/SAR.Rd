@@ -10,12 +10,12 @@ SAR(Y, X, W, iv_lag = 1, estimator = c("2SLS", "GMM"),
   \item{Y}{A numeric \code{T} by \code{N} outcome matrix.}
   \item{X}{An \code{N} by \code{p} numeric time-invariant covariate matrix if not time-varying, or a \code{T} by \code{N} by \code{p} numeric time-varying array. An intercept is added internally.}
   \item{W}{An \code{N} by \code{N} spatial weight matrix.}
-  \item{iv_lag}{A positive integer giving the maximum spatial lag of covariates included as instruments.}
+  \item{iv_lag}{A positive integer giving the maximum spatial lag of covariates included as instruments. Spatial lags are generated only for covariates with cross-sectional variation in at least one period.}
   \item{estimator}{\code{"2SLS"} or \code{"GMM"}.}
   \item{ci_level}{The confidence level for confidence intervals.}
   \item{hac_method}{\code{"Newey-West"} for Newey-West HAC or \code{"Andrews"} for Andrews HAC.}
   \item{preprocess_W}{If \code{FALSE}, apply built-in spatial weight preprocessing when needed. If \code{TRUE}, use \code{W} as supplied.}
 }
-\value{A list with \code{beta}, \code{rho}, \code{residuals}, and \code{diagnostics}. Coefficient tables contain \code{term}, \code{estimate}, \code{se}, \code{lower}, \code{upper}, and p-values in \code{p}; diagnostics include estimation, first-stage, HAC, and spatial weight details.}
-\details{The model has one constant spatial autoregressive coefficient. It instruments the endogenous spatial lag using covariates and their spatial lags, and estimates HAC standard errors over time.}
+\value{A list with \code{beta}, \code{rho}, \code{residuals}, and \code{diagnostics}. Coefficient tables contain \code{term}, \code{estimate}, \code{se}, \code{lower}, \code{upper}, and p-values in \code{p}; diagnostics include estimation, first-stage, HAC, spatial weight, and spatial-lag instrument details.}
+\details{The model has one constant spatial autoregressive coefficient. It instruments the endogenous spatial lag using covariates and their spatial lags, and estimates HAC standard errors over time. A covariate that is common to all spatial units within every period remains in the outcome equation but does not receive a redundant spatial-lag instrument.}
 \description{Fits a constant coefficient spatial autoregressive benchmark using two-stage least squares or feasible GMM.}

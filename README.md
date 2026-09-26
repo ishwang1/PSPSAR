@@ -35,6 +35,13 @@ Both functions add an intercept internally. Set `preprocess_W = TRUE` only
 when `W` has already been prepared for estimation; otherwise the functions
 apply their built-in spatial weight preprocessing.
 
+Spatial-lag instruments are generated only for covariates that exhibit
+cross-sectional variation in at least one period. A covariate that is common
+to all units within every period, such as a time fixed effect, remains in `X` but does not receive a redundant `W X`
+instrument. The included and excluded covariate names are reported in
+`diagnostics$spatial_iv_covariates` and
+`diagnostics$excluded_spatial_iv_covariates`.
+
 ## Returned values
 
 `PSPSAR()` returns coefficient and spillover tables, residuals,
